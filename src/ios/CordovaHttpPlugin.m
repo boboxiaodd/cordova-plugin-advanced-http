@@ -455,7 +455,14 @@
                 [[SDNetworkActivityIndicator sharedActivityIndicator] stopActivity];
                 return;
             }
-        } progress:nil success:^(NSURLSessionTask *task, id responseObject) {
+        } progress:^(NSProgress * _Nonnull uploadProgress) {
+             CGFloat fractionCompleted = (CGFloat)(uploadProgress.fractionCompleted);
+             NSDictionary *params = @{@"progress":@(fractionCompleted)};
+             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:params];
+             [pluginResult setValue:@(YES) forKey:@"keepCallback"];
+             [weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+         } success:^(NSURLSessionTask *task, id responseObject) {
             NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
             [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
 
